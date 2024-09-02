@@ -14,4 +14,4 @@ COPY . /app
 
 EXPOSE 3000
 
-CMD ["poetry", "run", "python", "web_service/main.py"]
+CMD ["poetry", "run", "python", "main.py"]

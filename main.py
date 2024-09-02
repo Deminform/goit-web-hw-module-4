@@ -81,7 +81,7 @@ def udp_server(ip="localhost", port=5000):
                 key: value
                 for key, value in [el.split("=", 1) for el in result.split("&", 1)]
             }
-            status = add_json_record("./storage/data.json", data_dict)
+            status = add_json_record(storage_file, data_dict)
             sock.sendto(str(status).encode(), address)
             print(f'Record is: "{data_dict}" | recorded: "{status}"')
     except KeyboardInterrupt:
@@ -93,11 +93,10 @@ def udp_server(ip="localhost", port=5000):
 def add_json_record(filename, data):
     records = {}
     try:
-        if os.path.getsize(filename) != 0:
-            with open(filename, "r", encoding="utf-8") as file:
-                records.update(json.load(file))
+        with open(filename, "r", encoding="utf-8") as file:
+            records.update(json.load(file))
 
-        with open(filename, "r+", encoding="utf-8") as file_path:
+        with open(filename, "w", encoding="utf-8") as file_path:
             records.update({str(datetime.today()): data})
             json.dump(records, file_path, ensure_ascii=False, indent=4)
 
@@ -107,7 +106,7 @@ def add_json_record(filename, data):
 
 
 def http_server(server_class=HTTPServer, handler_class=HttpHandler):
-    server_address = ("localhost", 3000)
+    server_address = ("0.0.0.0", 3000)
     http = server_class(server_address, handler_class)
     print(f"Starting HTTP server on {server_address[0]}:{server_address[1]}")
     try:
@@ -118,6 +117,14 @@ def http_server(server_class=HTTPServer, handler_class=HttpHandler):
 
 
 if __name__ == "__main__":
+    storage_dir = pathlib.Path("storage")
+    storage_dir.mkdir(exist_ok=True)
+
+    storage_file = storage_dir / "data.json"
+    if not storage_file.exists():
+        with open(storage_file, 'w') as f:
+            json.dump({}, f)
+
     methods = [http_server, udp_server]
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         for method in methods:
