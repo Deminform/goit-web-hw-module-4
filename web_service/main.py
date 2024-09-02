@@ -107,9 +107,9 @@ def add_json_record(filename, data):
 
 
 def http_server(server_class=HTTPServer, handler_class=HttpHandler):
-    print("Starting server...")
-    server_address = ("", 3000)
+    server_address = ("localhost", 3000)
     http = server_class(server_address, handler_class)
+    print(f"Starting HTTP server on {server_address[0]}:{server_address[1]}")
     try:
         http.serve_forever()
         print("Server loop running")
