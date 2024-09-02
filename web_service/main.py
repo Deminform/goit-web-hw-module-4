@@ -1,4 +1,6 @@
 import concurrent.futures
+import os
+from functools import wraps
 import json
 import mimetypes
 import pathlib
@@ -87,15 +89,17 @@ def udp_server(ip='localhost', port=5000):
 def add_json_record(filename, data):
     records = {}
     try:
-        with open(filename, 'r', encoding='utf-8') as file:
-            records.update(json.load(file))
-    except FileNotFoundError as msg:
-        return msg
-    else:
+        if os.path.getsize(filename) != 0:
+            with open(filename, 'r', encoding='utf-8') as file:
+                records.update(json.load(file))
+
         with open(filename, 'r+', encoding='utf-8') as file_path:
             records.update({str(datetime.today()): data})
             json.dump(records, file_path, ensure_ascii=False, indent=4)
+
         return True
+    except FileNotFoundError as msg:
+        return msg
 
 
 def http_server(server_class=HTTPServer, handler_class=HttpHandler):
